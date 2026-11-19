@@ -22,7 +22,8 @@ node scripts/export.cjs poster.html poster.png poster.pdf
 | 字段 | 用途 |
 | --- | --- |
 | title、intro、kicker | 标题、导语和可选的范围或系列名。 |
-| lang、footer_title | 设置文档语言和末尾来源区标题；中文和英文有默认标题。 |
+| lang | 填已确认的成品语言标签，如 `zh-CN`、`zh-Hant`、`en` 或 `ja`。双语同图填主语言，两种文案都写入要展示的字段。 |
+| footer_title、palette.heading、sources[].records_label | 有相应区域时，用成品语言填写来源区标题、配色参考标题和展开索引的按钮文字。例如日文版可用「集計方法と出典」「配色の参考資料」「出典一覧を開く」。 |
 | data_note | 首屏资料说明。整图模拟时注明“演示数据”；混合来源在对应图的 note 中分别标记。 |
 | palette | 联网研究后填入五个颜色角色和网页参考，可直接影响 HTML、PNG、PDF。省略时使用内置色板。字段和可复制示例见[联网取色](palette.md)。 |
 | metrics | 可选首屏指标数组。每项含 label、value，可附 refs。 |
@@ -58,4 +59,4 @@ node scripts/export.cjs poster.html poster.png poster.pdf
 }
 ```
 
-图表输入用 JSON 数字，单位写在 unit；同一块使用同一单位。缺失标为 null，显示为长横线，折线也会断开。条形、矩阵和折线输入中的 0 会保留。数值需要预先按展示精度取舍。若需不同语言版，从同一套数字和来源生成不同内容稿，对照核对后分别导出。视觉定制可在项目副本中修改 [海报模板](../assets/poster.html)。
+图表输入用 JSON 数字，单位写在 unit；同一块使用同一单位。缺失标为 null，显示为长横线，折线也会断开。条形、矩阵和折线输入中的 0 会保留。数值需要预先按展示精度取舍。多语言分版用同一套数字和来源分别制稿、导出。检查实际图中的语言、字形和长标签换行，尤其留意图例及页尾。视觉定制可在项目副本中修改 [海报模板](../assets/poster.html)。
