@@ -1,65 +1,80 @@
-# 数据长图 · data-infographic
+# 数据长图
 
-用 Codex 把大量文章、报告、访谈、反馈记录、视频转录或表格做成竖版信息图。成品中的编号可以回查原文。Agent 还会在网上查看该主题或创作者的公开作品，把有依据的配色用到整张图。
+这是一个在 Codex 对话里使用的小工具。把文章、访谈、读者来信或表格发给它，它会找出重点，做成一张竖版长图。读者先看关键发现，再往下看图表和原文例子。
 
-## 安装
+[![虚构的社区维修记录。三周分别修好 5、7、9 件，第三周比第一周多 4 件。点开可看完整长图。](docs/from-records-to-chart.png)](docs/repair-day.png)
 
-首次安装时，在 macOS 或 Linux 上用有仓库读取权限的账号登录 GitHub CLI（`gh auth login`），再把仓库克隆到个人 Skill 目录。
+在这个虚构的「社区维修日」例子里，多修好的 4 件来自灯具和衣物，各多 2 件。木器数量持平。[看完整长图](docs/repair-day.png)
+
+## 怎样做出第一张图？
+
+**第一次用，先安装。** 在 Codex 对话里发送下面这句话。这个仓库是私有的，安装时需要连接有访问权限的 GitHub 账号。
+
+> 请从 GitHub 仓库 `guokaixin137-droid/data-infographic` 安装个人技能 `data-infographic`。技能就在仓库最外层。
+
+如果你已经下载了仓库，也可以在 Codex 里打开解压后的文件夹，说「请安装这个技能」。
+
+**装好后，发材料。** 可以附文件、告诉 Codex 要读哪个文件夹，或贴一个它能打开的分享链接。比如，附上读者来信后，可以在对话里这样说。
+
+> 用 `$data-infographic` 把这些读者来信做成一张长图，给编辑部开会用。最后给我一张能发到群里的图片。
+
+一整年的来信也可以一起交。Codex 会分批读。统计“有多少封提到这件事”时，同一封信分成几段都只算一封。视频可以发文字稿。如果 Codex 已连接 Clipto，也可以直接贴 Clipto 的分享链接。
+
+## 我需要自己选题吗？
+
+每个新项目开始时，Codex 会先问你想怎么定内容。如果第一句话里已经选好了，它就按你的选择继续。
+
+- **想直接拿到图**，回复「你来定」。Codex 会读材料、选重点，再把图做好。
+- **想自己拿主意**，回复「先给我几个方向」。Codex 会列出材料能支持的选题。你可以只挑一个、选几个，也可以提出自己的想法。接下来它会围绕你选的内容补上对比、原文和例子。
+
+![选题对话示意。用户在“怎么选书”和“为什么读到一半就放下”中选了第二项，并请 Codex 用来信原话举例。](docs/choosing-a-topic.png)
+
+## 可以用我喜欢的颜色吗？
+
+可以直接说「用我们的品牌蓝」，也可以发一张参考图。给出博主主页，Codex 会从这位博主的公开作品里找常用色。只给主题，它就上网对照同类报告和信息图。你也可以要求离线制作。
+
+![相同的维修数据呈现两种配色。左边参考社区维修报告，用蓝紫和浅金。右边参考 Wes Bos 的 Cobalt2 作品，用深蓝和亮黄。](docs/palette-comparison.png)
+
+这两张小图用的是同一组虚构数字，方便比较颜色。成品页尾会列出配色参考。[社区维修报告，第 12–13 页](https://openrepair.org/wp-content/uploads/2024/10/ORA-report-2024-The-rise-of-community-repair.pdf#page=12) · [Wes Bos 的 Cobalt2 色表](https://github.com/wesbos/cobalt2-vscode#colours)
+
+## 做好后，应该用哪个文件？
+
+| 你想做什么 | 让 Codex 给你 |
+| --- | --- |
+| 发到群里，或插入幻灯片 | **PNG 图片**，打开就能看整张长图。 |
+| 一边阅读，一边查数字和引文来自哪里 | **HTML 网页**，用浏览器打开，点编号就能跳到出处说明。 |
+| 打印，或放大查看细小的图表 | **PDF 文档**，整张图在一页内，放大后文字和线条依然清晰。 |
+
+![网页版的出处跳转示意。点“三周修好物品”旁的编号 1，会跳到页尾的“示例完工登记表”，看到表名和范围。](docs/follow-a-source.png)
+
+默认使用能在材料中核实的内容。做概念演示时，可以说明「允许用模拟数字，请在图上标明」。拿到成品后也可以接着说「把第二部分加长」或「再给我一份 PDF」。
+
+<details>
+<summary>习惯用终端？展开手动安装和导出示例</summary>
+
+在 macOS 或 Linux 上，用有仓库访问权限的账号登录 GitHub CLI（`gh auth login`），然后运行以下命令。
 
 ```sh
 skill_root="${CODEX_HOME:-$HOME/.codex}/skills"
 mkdir -p "$skill_root"
 gh repo clone guokaixin137-droid/data-infographic "$skill_root/data-infographic"
+cd "$skill_root/data-infographic"
 ```
 
-## 在 Codex 里开始一张图
-
-在新对话里附上材料，说明受众和用途。例如，你可以这样发起一个项目。
-
-> 用 `$data-infographic` 把这一年的读者来信和书评做成一张竖版长图。先给我几个内容方向，用色参考这位书评博主的主页和专栏封面。我需要高清 PNG 和可以点开出处的 HTML。
-
-每个新项目先确认一次选题方式。若你已经在请求里说明了偏好，Codex 会沿着该方式继续。
-
-| 选题方式 | 你会看到什么 |
-| --- | --- |
-| **直接生成** | Codex 阅读资料，挑出值得讲的发现，配上能解释它们的对比和案例，直接交付成图。 |
-| **先看方向，我来选** | Codex 通常列出 3–5 个有材料支撑的方向，说明各自能回答什么、可以怎样画。你可以只选一部分，也可以自拟方向。选定后，Codex 会围绕它们补齐相关数据、趋势和案例。 |
-
-例如，在第二种方式里，你可以回复「我选读者反复提到的选书难点。请补上不同阅读人群的对比，再举两个原文案例。」之后想增加篇幅、调整配色或换导出格式，都可以沿用已选主线。
-
-## 大量文本和联网配色如何处理
-
-长文按来源、章节或记录分批阅读，再合并跨批出现的主题。一篇文章即使被切成十块，统计“多少篇提到”时仍只算一篇。结论可以指向页码、小节、行号、记录编号或时间点。本地文本可用随附工具生成带定位的 JSONL。[大批量文本工作流](references/large-text.md)
-
-选题确定后，Agent 会打开相关公开网页。分析具名博主时，查其本人主页、代表作品或色彩规范；只有主题时，对照相应领域不同发布者的专题、报告和信息图。选定的颜色会用于背景、标题、条形、折线和矩阵，页尾附配色来源及必要的明暗调整说明。用户可以直接给品牌色或要求离线制作。[联网取色与色板示例](references/palette.md)
-
-使用 Clipto 分享链接时，可通过当前会话已连接的 Clipto 工具读取转录，也可以直接附上导出的转录文件。默认采用资料中可核验的信息。做演示时可以明确允许模拟数值，成品会在相应位置标注。
-
-## 看一张成品
-
-这张图使用虚构的「社区维修日」记录。第一周修好 5 件，第三周修好 9 件，矩阵解释了新增的 4 件来自哪里。图中蓝紫色和浅金色分别取样自一份社区维修报告的第 12、13 页。点击预览可看原图。[示例数据和色板](assets/example.json) · [配色参考原页](https://openrepair.org/wp-content/uploads/2024/10/ORA-report-2024-The-rise-of-community-repair.pdf#page=12)
-
-<a href="docs/repair-day.png"><img src="docs/repair-day.png" width="480" alt="社区维修日竖版信息图。三周共修好 21 件，相比第一周，第三周的灯具和衣物各多修好 2 件。"></a>
-
-## 在本地复现示例
-
-在仓库根目录运行以下命令，用 Python 3 生成 `poster.html`，双击即可离线阅读。
+在仓库目录里，用 Python 3 生成可以离线打开的示例网页。
 
 ```sh
 python3 scripts/render.py assets/example.json poster.html
 ```
 
-导出 PNG 和 PDF 还需要 Node.js、Playwright（或 `playwright-core`）和 Chromium 系浏览器。首次配置导出环境时，可以在同一目录运行以下两行。
+如需导出 PNG 和 PDF，还要有 Node.js、Playwright（或 `playwright-core`）以及 Chromium 系浏览器。首次配置可运行前两行，已有这些工具可以直接运行最后一行。
 
 ```sh
 npm install --no-save --package-lock=false playwright
 npx playwright install chromium
-```
-
-下面的命令会生成宽 2400 像素的 `poster.png` 和可放大阅读的单页矢量 `poster.pdf`。如果只需要一种格式，保留相应的输出文件名即可。
-
-```sh
 node scripts/export.cjs poster.html poster.png poster.pdf
 ```
 
-要换成自己的数据，可以从示例 JSON 改起。图表类型、来源字段和浏览器路径设置见[模板与导出说明](references/rendering.md)。选题和核验流程见 [SKILL.md](SKILL.md)。
+模板默认导出宽 2400 像素的 PNG 和单页矢量 PDF。[示例数据](assets/example.json) · [模板与导出](references/rendering.md) · [大批量文本](references/large-text.md) · [联网取色](references/palette.md) · [完整技能说明](SKILL.md)
+
+</details>
