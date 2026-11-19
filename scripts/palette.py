@@ -36,10 +36,11 @@ def contrast(a, b):
     return (high + .05) / (low + .05)
 
 
-def readable(color, surface, minimum=4.5):
+def readable(color, surface, minimum=4.5, endpoint=None):
     if contrast(color, surface) >= minimum:
         return color
-    endpoint = max(("#000000", "#ffffff"), key=lambda c: contrast(c, surface))
+    if endpoint is None:
+        endpoint = max(("#000000", "#ffffff"), key=lambda c: contrast(c, surface))
     lower, upper = 0.0, 1.0
     for _ in range(10):
         middle = (lower + upper) / 2
@@ -50,10 +51,10 @@ def readable(color, surface, minimum=4.5):
     return mix(color, endpoint, upper)
 
 
-def text_on_fill(ink, fill):
+def text_on_fill(ink, fill, alternatives=("#ffffff", "#000000")):
     if contrast(ink, fill) >= 4.5:
         return ink
-    return max(("#ffffff", "#000000"), key=lambda c: contrast(c, fill))
+    return max(alternatives, key=lambda c: contrast(c, fill))
 
 
 def resolve(colors):

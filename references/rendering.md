@@ -4,7 +4,7 @@
 
 ## 制作和导出
 
-以下命令在技能目录运行。实际使用时将内容稿和成品路径指向用户的项目目录。随附的 [维修日内容稿](../assets/example.json) 是可直接运行的虚构示例。
+以下命令在技能目录运行。实际使用时将内容稿和成品路径指向用户的项目目录。[维修日内容稿](../assets/example.json) 适合从表格起步。[读者来信内容稿](../assets/collection-example.json) 可直接代入同一命令，演示可回查的合集、分布、两组比较和带中位数的区间。两个示例均为虚构。
 
 ~~~sh
 python3 scripts/render.py assets/example.json poster.html
@@ -27,7 +27,7 @@ node scripts/export.cjs poster.html poster.png poster.pdf
 | data_note | 首屏资料说明。整图模拟时注明“演示数据”；混合来源在对应图的 note 中分别标记。 |
 | palette | 联网研究后填入五个颜色角色和网页参考，可直接影响 HTML、PNG、PDF。省略时使用内置色板。字段和可复制示例见[联网取色](palette.md)。 |
 | metrics | 可选首屏指标数组。每项含 label、value，可附 refs。 |
-| lead | 首屏的完整图块，与下表各类图块共用字段。只在这里放一次主图。 |
+| lead | 首屏的完整图块，与下表各类图块共用字段。行数少的主结果可设 placement 为 beside，与标题并排，手机自动上下排列。复杂主图保留全宽。 |
 | sections | 有序章节。每项含非空 blocks，可加 title、summary、columns（1、2 或 3，默认 2）。图块标题已经说清问题时可以省略章标题。窄屏自动重排。 |
 | method | 汇总口径、时间范围、覆盖和缺失说明。 |
 | sources | 来源数组。每项使用唯一 id 和易读 label，按需加 locator（页码、表格范围、时间码）、excerpt 或原始 http(s) 链接 url。合集可加 records（每项含 label、url，可加 locator）、records_label（展开按钮文字）及 key（计算或检索口径），让网页版逐份回查。 |
@@ -36,13 +36,15 @@ node scripts/export.cjs poster.html poster.png poster.pdf
 
 | type | 输入 | 绘制方式 |
 | --- | --- | --- |
-| bars | rows，每行有 label、value | 横条以零为基线，支持正负数。适合排名与同口径分组。 |
+| bars | rows，每行有 label、value，可选 domain、suffix | 横条以零为基线，支持正负数。百分比用 `"domain":[0,100],"suffix":"%"` 标明满刻度。跨图共轴时提供相同的 domain。 |
 | columns | rows，每行有 label、value | 从零基线绘制等宽竖柱，适合件数、分组频数或“每份文档涉及几个主题”的分布。 |
 | trend | rows，每行有 label、value | 按输入顺序等距绘制，并列出每个点的实际值。适用于等时间间隔；不规则间隔请先汇总或另绘时间轴。 |
 | matrix | columns，以及带 label、values 的 rows | 每行数值数量与列数一致。正值使用主色，负值使用负值色，数字保留正负号。宽矩阵自动跨栏，超过 8 列拆成连续小表，共用同一色阶和行标题。 |
+| themes | source、themes、labels，原始记录放在该来源的 records 里 | 自动生成频次和共现图。点数字可在 HTML 查看记录和对应片段。详见下节。 |
 | flow | from、to 各列一组含 id、label 的节点，可加 detail、refs。links 的每项含 from、to（节点 id），可选 value。两侧可加 from_label、to_label。 | 每条连接都带非负数量时，带宽按同一比例绘制，节点默认显示相连数量之和。多标签共现可设 show_totals 为 false，在 detail 另写去重的记录数。全都省略 value 时，用等宽连线表达路径、职责或用途。单位、重复计数口径写在图边。 |
 | units | total、非空 rows，行含 label、整数 value，可加 detail、refs、approx。可指定每行的点数 columns 和 show_as（fraction 或 percent）。 | 一格代表图例写明的一个单位。已知调查百分比时，用 100 格表示百分比，并在 detail 写实际样本人数。建议“约每十场抽一场”可画 1/10，并在该行设置 approx 为 true。有顺序的最后几项可用 fill_from 为 end，从末端点亮。 |
-| intervals | domain 为刻度的两个端点，rows 的每行含 label、low、high，可附 refs。 | 在共轴上标出各区间的两个端点。在 unit 写清单位和含义，例如嘉宾报告的评分增幅。 |
+| intervals | domain 为刻度的两个端点，rows 的每行含 label、low、high，可加 estimate、suffix（图块级）、refs。 | 区间可跨零。有来源给出的点估计时，estimate 按其真实位置绘制。说明上下界是分位数、最值还是某个置信水平的区间。自行换算时，把估计和上下界换成同一单位，记录计算依据。 |
+| paired | groups 为两个组名，domain 为共轴端点。每行含 label、a、b，可选 refs，图块可加 suffix。 | 空心点和实心点分别标出两组，数字顺序与图例一致。用于前后或同口径分组比较。缺失的一端用 null，只有两端都有值时才连线。百分比之差用百分点。 |
 | figures | rows，每项含 label、value，可加 suffix、detail、refs。 | 直接标记用时、单位不同的个案指标或只知道方向的结果。适合做主图旁的补充。 |
 | cases | items，每项有 title、text，可附 refs | 原话、特殊口径或其他必须保留文字的个案旁注。 |
 
@@ -60,3 +62,11 @@ node scripts/export.cjs poster.html poster.png poster.pdf
 ```
 
 图表输入用 JSON 数字，单位写在 unit；同一块使用同一单位。缺失标为 null，显示为长横线，折线也会断开。条形、矩阵和折线输入中的 0 会保留。数值需要预先按展示精度取舍。多语言分版用同一套数字和来源分别制稿、导出。检查实际图中的语言、字形和长标签换行，尤其留意图例及页尾。视觉定制可在项目副本中修改 [海报模板](../assets/poster.html)。
+
+## 从合集生成可回查的两张图
+
+在 `sources` 中放一份核对过的记录清单。`records` 每项给出唯一 `id`、`label` 和 `passages`。已审阅但未命中的记录写 `"passages":[]`。每段填写 `themes`（一个或多个主题 ID）、`locator`（时间码、页码或行号），可用 `text` 写一句释义。记录可附 `url`，片段也可用自己的原文链接。只有录音主页时，链接到录音并把时间段写在旁边。来源的 `records_label` 用成品语言填写。
+
+把图块的 `source` 指向这份来源，`themes` 填各主题的 `id`、`label` 和可选的矩阵短名 `short`。`labels` 提供成品语言的四段界面文字，分别为 `frequency`、`overlap`、`evidence` 和 `all`。另填 `labels.coverage` 即可显示自动算出的“至少命中一个主题的记录数 / 已审阅数”。在图说交代格子的含义，在 `note` 说明筛选方法和样本缺口。选少数与主问题有关的主题，矩阵在窄屏也容易辨认。[完整可运行示例](../assets/collection-example.json)
+
+网页版可用 `labels.hint` 提示读者点选格子，其他语言按目标语言填写。图下会就近显示 `refs` 指向的来源和 `locator`，来源有 `url` 时可直接打开。名称较长可给来源填 `short_label`。静态导出收起交互提示和索引，主要数字、解释和出处留在画面内。

@@ -50,6 +50,7 @@ async function main() {
     await page.evaluate(() => document.fonts.ready);
     const poster = page.locator("#poster");
     await poster.waitFor();
+    await poster.evaluate(element => element.classList.add("static-export"));
     for (const file of outputs) {
       if (path.extname(file).toLowerCase() === ".png") {
         await page.emulateMedia({ media: "screen" });
