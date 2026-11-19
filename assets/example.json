@@ -2,7 +2,6 @@
   "lang": "zh-CN",
   "kicker": "社区维修日 · 三周观察",
   "title": "第三周，多修好的四件从哪来？",
-  "intro": "三次活动共修好 21 件物品。从第一周到第三周，灯具和衣物各多修好 2 件，木器数量持平。",
   "data_note": "演示数据 · 活动与记录均为虚构",
   "palette": {
     "colors": {
@@ -20,26 +19,35 @@
     {"label": "首周到第三周", "value": "5 → 9 件", "refs": ["ledger"]},
     {"label": "贡献增量的类别", "value": "2 类", "refs": ["ledger"]}
   ],
+  "lead": {
+    "type": "flow", "title": "每周修好了哪些物品？", "caption": "带子越宽，表示该周修好的这类物品越多。", "refs": ["ledger"],
+    "from_label": "完工周 / 件", "to_label": "维修类别 / 件",
+    "from": [{"id": "w1", "label": "第一周"}, {"id": "w2", "label": "第二周"}, {"id": "w3", "label": "第三周"}],
+    "to": [{"id": "lamp", "label": "灯具"}, {"id": "wood", "label": "木器"}, {"id": "cloth", "label": "衣物"}],
+    "links": [
+      {"from": "w1", "to": "lamp", "value": 2}, {"from": "w1", "to": "wood", "value": 2}, {"from": "w1", "to": "cloth", "value": 1},
+      {"from": "w2", "to": "lamp", "value": 2}, {"from": "w2", "to": "wood", "value": 3}, {"from": "w2", "to": "cloth", "value": 2},
+      {"from": "w3", "to": "lamp", "value": 4}, {"from": "w3", "to": "wood", "value": 2}, {"from": "w3", "to": "cloth", "value": 3}
+    ]
+  },
   "sections": [
     {
-      "title": "每周都多修好了两件",
-      "summary": "灯具的三周累计最高。按周展开后，增长来自哪些类别才看得清楚。",
+      "title": "灯具和衣物各多修了两件",
       "blocks": [
         {
-          "type": "trend", "title": "每周修好件数", "unit": "件 / 周", "refs": ["ledger"],
+          "type": "trend", "title": "每周修好件数", "caption": "每个点是当周修好的物品总数。", "refs": ["ledger"],
           "rows": [{"label": "第一周", "value": 5}, {"label": "第二周", "value": 7}, {"label": "第三周", "value": 9}]
         },
         {
-          "type": "bars", "title": "按物品类别累计", "unit": "件 · 三周合计", "refs": ["ledger"],
-          "rows": [{"label": "灯具", "value": 8}, {"label": "木器", "value": 7}, {"label": "衣物", "value": 6}]
+          "type": "bars", "title": "第三周比首周多修了几件？", "unit": "件 · 按类别", "refs": ["ledger"],
+          "rows": [{"label": "灯具", "value": 2}, {"label": "衣物", "value": 2}, {"label": "木器", "value": 0}]
         }
       ]
     },
     {
-      "title": "灯具在最后一周增加，衣物连续两周增加",
       "blocks": [
         {
-          "type": "matrix", "title": "三类物品分别在哪周修好？", "unit": "件 · 颜色越深，件数越多", "refs": ["ledger"],
+          "type": "matrix", "title": "三类物品分别在哪周修好？", "caption": "颜色越深，这类物品当周修好的件数越多。", "refs": ["ledger"],
           "columns": ["灯具", "木器", "衣物"],
           "rows": [
             {"label": "第一周", "values": [2, 2, 1]},
@@ -48,18 +56,27 @@
           ]
         },
         {
-          "type": "cases", "title": "再看维修台上的记录",
-          "items": [
-            {"title": "一盏台灯怎样算一件？", "text": "一盏台灯更换两个零件，按一件完工物品登记。", "refs": ["notes"]},
-            {"title": "一张椅子何时入账？", "text": "椅子在第二周送来，第三周修好，计入第三周的木器。", "refs": ["notes"]}
-          ]
+          "type": "flow", "title": "维修台怎样登记？", "caption": "沿箭头看一件物品怎么计数、算在哪一周。", "refs": ["notes"],
+          "from": [{"id": "lamp", "label": "台灯换两个零件"}, {"id": "chair", "label": "木椅跨周修理"}],
+          "to": [{"id": "one", "label": "算一件灯具"}, {"id": "done", "label": "计入完工周"}],
+          "links": [{"from": "lamp", "to": "one"}, {"from": "chair", "to": "done"}]
         }
+      ]
+    },
+    {
+      "title": "还有九件没修好，卡在哪里？",
+      "blocks": [
+        {"type":"units", "title":"送修物品的完工率", "caption":"每点是一件送修物品，着色点表示三周内已修好。", "refs":["intake"],
+         "total":30, "columns":10, "show_as":"percent", "rows":[{"label":"21 件已修好 / 30 件送修", "value":21}]},
+        {"type":"columns", "title":"九件待办的去向", "caption":"按最后一次活动结束时的登记状态计数。", "refs":["intake"],
+         "rows":[{"label":"等待零件","value":5},{"label":"预约复修","value":3},{"label":"待确认","value":1}]}
       ]
     }
   ],
-  "method": "按完工周统计，每件物品只计一次。此例使用虚构登记表和虚构案例，供练习选题、制图和出处跳转。",
+  "method": "每件物品仅在完工周计一次。",
   "sources": [
     {"id": "ledger", "label": "示例完工登记表", "locator": "虚构资料 · 三周汇总表，3 个类别 × 3 周"},
-    {"id": "notes", "label": "示例维修台记录", "locator": "虚构资料 · 台灯与木椅两条登记说明"}
+    {"id": "notes", "label": "示例维修台记录", "locator": "虚构资料 · 台灯与木椅两条登记说明"},
+    {"id": "intake", "label": "示例送修登记表", "locator": "虚构资料 · 30 件送修物品，统计到第三次活动结束"}
   ]
 }

@@ -1,4 +1,4 @@
 interface:
   display_name: "数据长图"
-  short_description: "从大量文本制作可溯源的竖版信息图，按主题或创作者联网研究配色"
-  default_prompt: "用 $data-infographic 把这些资料做成竖版信息图，先确认选题方式，再查找与主题或创作者相关的配色。"
+  short_description: "从大量材料提炼关系，制作以图表为主、可查出处的竖图，并按主题或创作者配色"
+  default_prompt: "用 $data-infographic 把这些资料做成竖版信息图，先确认选题，再按主题配色，用主图和简短标注讲清发现。"

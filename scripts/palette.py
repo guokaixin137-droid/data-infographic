@@ -58,7 +58,8 @@ def text_on_fill(ink, fill):
 
 def resolve(colors):
     if colors is None:
-        return DEFAULT.copy()
+        return {**DEFAULT, "accent-mark": readable(BASE["accent"], BASE["paper"], 3),
+                "accent-text": readable(BASE["accent"], BASE["paper"])}
     if not isinstance(colors, dict) or set(colors) != set(BASE):
         raise ValueError("palette.colors requires paper, ink, primary, accent and negative")
     for role, value in colors.items():
@@ -75,6 +76,7 @@ def resolve(colors):
     primary_text = readable(readable(primary, paper), footer)
     return {
         **colors, "ink": ink, "primary": primary, "negative": negative, "muted": muted,
+        "accent-mark": readable(accent, paper, 3), "accent-text": readable(accent, paper),
         "rule": mix(paper, ink, .36), "outside": mix(paper, ink, .18), "on-hero": paper,
         "hero-accent": readable(accent, ink), "on-accent": readable(ink, accent),
         "hero-rule": mix(ink, paper, .5), "track": track, "baseline": mix(paper, ink, .6),
