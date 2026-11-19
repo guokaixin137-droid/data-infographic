@@ -4,6 +4,17 @@
   "title": "第三周，多修好的四件从哪来？",
   "intro": "三次活动共修好 21 件物品。从第一周到第三周，灯具和衣物各多修好 2 件，木器数量持平。",
   "data_note": "演示数据 · 活动与记录均为虚构",
+  "palette": {
+    "colors": {
+      "paper": "#FFFFFF", "ink": "#211F42", "primary": "#3127D6",
+      "accent": "#F2DDA3", "negative": "#ED3E3B"
+    },
+    "references": [{
+      "label": "Open Repair Alliance · The rise of community repair",
+      "url": "https://openrepair.org/wp-content/uploads/2024/10/ORA-report-2024-The-rise-of-community-repair.pdf#page=12",
+      "note": "蓝紫与红色取样自第 12 页图表，浅金取样自第 13 页重点标记。深墨色由本图选配。"
+    }]
+  },
   "metrics": [
     {"label": "三周修好物品", "value": "21 件", "refs": ["ledger"]},
     {"label": "首周到第三周", "value": "5 → 9 件", "refs": ["ledger"]},

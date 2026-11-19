@@ -24,6 +24,7 @@ node scripts/export.cjs poster.html poster.png poster.pdf
 | title、intro、kicker | 标题、导语和可选的范围或系列名。 |
 | lang、footer_title | 设置文档语言和末尾来源区标题；中文和英文有默认标题。 |
 | data_note | 首屏资料说明。整图模拟时注明“演示数据”；混合来源在对应图的 note 中分别标记。 |
+| palette | 联网研究后填入五个颜色角色和网页参考，可直接影响 HTML、PNG、PDF。省略时使用内置色板。字段和可复制示例见[联网取色](palette.md)。 |
 | metrics | 可选首屏指标数组。每项含 label、value，可附 refs。 |
 | sections | 有序章节。每项包含 title、可选 summary 和非空 blocks；顺序即讲述顺序。 |
 | method | 汇总口径、时间范围、覆盖和缺失说明。 |
@@ -35,7 +36,7 @@ node scripts/export.cjs poster.html poster.png poster.pdf
 | --- | --- | --- |
 | bars | rows，每行有 label、value | 横条以零为基线，支持正负数。适合排名与同口径分组。 |
 | trend | rows，每行有 label、value | 按输入顺序等距绘制，并列出每个点的实际值。适用于等时间间隔；不规则间隔请先汇总或另绘时间轴。 |
-| matrix | columns，以及带 label、values 的 rows | 每行数值数量与列数一致。整表按最大绝对值着色，正值为绿，负值为红，保留显示值。 |
+| matrix | columns，以及带 label、values 的 rows | 每行数值数量与列数一致。正值使用主色，负值使用负值色，数字保留正负号。宽矩阵自动跨栏，超过 8 列拆成连续小表，共用同一色阶和行标题。 |
 | cases | items，每项有 title、text，可附 refs | 为邻近图表补人物、事件或登记口径的实例。 |
 
 图表输入用 JSON 数字，单位写在 unit；同一块使用同一单位。缺失标为 null，显示为长横线，折线也会断开。条形、矩阵和折线输入中的 0 会保留。数值需要预先按展示精度取舍。若需不同语言版，从同一套数字和来源生成不同内容稿，对照核对后分别导出。视觉定制可在项目副本中修改 [海报模板](../assets/poster.html)。
