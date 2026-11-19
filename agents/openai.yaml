@@ -1,4 +1,4 @@
 interface:
   display_name: "数据长图"
-  short_description: "从大量材料提炼关系，制作以图表为主、可查出处的竖图，并按主题或创作者配色"
-  default_prompt: "用 $data-infographic 把这些资料做成竖版信息图，先确认选题方式和成品语言，再按主题配色，用主图和简短标注讲清发现。"
+  short_description: "把合集或报告做成可回查原文的多图长图，比较主题、分布与分组差异"
+  default_prompt: "用 $data-infographic 把这些资料做成竖版信息图，确认选题和语言后，用有出处的主图与互补图表讲清材料里的发现。"

@@ -8,7 +8,7 @@ from pathlib import Path
 from string import Template
 from urllib.parse import urlsplit
 
-from palette import mix, resolve, text_on_fill
+from palette import mix, readable, resolve, text_on_fill
 
 
 def checked_list(items, name):
@@ -57,10 +57,33 @@ def heading_text(value, lang, citations=""):
     return e(value) + citations
 
 
+def domain(block, values):
+    lo, hi = block["domain"]
+    if len(numbers([lo, hi])) != 2 or hi <= lo:
+        raise ValueError("A chart domain needs two increasing finite numbers")
+    if any(v < lo or v > hi for v in values):
+        raise ValueError("A plotted value falls outside the specified domain")
+    return lo, hi
+
+
+def scale_axis(lo, hi, suffix=""):
+    ticks = [(0, lo), (100, hi)]
+    if lo < 0 < hi:
+        zero = -100 * lo / (hi - lo)
+        # Leave room for the end labels when zero lies close to either edge.
+        if 8 < zero < 92:
+            ticks.insert(1, (zero, 0))
+    labels = [f'<span style="left:{position:.4f}%">{fmt(value)}{e(suffix)}</span>' for position, value in ticks]
+    return '<div class="scale-axis">' + "".join(labels) + '</div>'
+
+
 def bars(block, refs):
     rows = checked_list(block["rows"], "bar rows")
     values = numbers([row["value"] for row in rows])
     lo, hi = min([0, *values]), max([0, *values])
+    if "domain" in block:
+        lo, hi = domain(block, [0, *values])
+    suffix = block.get("suffix", "")
     span = hi - lo or 1
     zero = 100 * -lo / span
     result = []
@@ -75,9 +98,10 @@ def bars(block, refs):
         result.append(
             f'<div class="bar-row"><span class="row-label">{e(row["label"])}{refs(row)}</span>'
             f'<span class="track" style="--zero:{zero:.4f}%" aria-hidden="true">{fill}</span>'
-            f'<span class="value">{fmt(value)}</span></div>'
+            f'<span class="value">{fmt(value)}{e(suffix) if value is not None else ""}</span></div>'
         )
-    return '<div class="bar-chart">' + "".join(result) + "</div>"
+    axis = '<div class="bar-axis">' + scale_axis(lo, hi, suffix) + '</div>' if "domain" in block else ""
+    return '<div class="bar-chart">' + "".join(result) + axis + "</div>"
 
 
 def trend(block, refs):
@@ -144,7 +168,7 @@ def column_chart(block, refs):
     return '<div class="columns-chart">' + "".join(items) + '</div>'
 
 
-def matrix(block, refs, colors):
+def matrix(block, refs, colors, cell_content=None):
     columns = checked_list(block["columns"], "matrix columns")
     rows = checked_list(block["rows"], "matrix rows")
     values = []
@@ -153,21 +177,24 @@ def matrix(block, refs, colors):
             raise ValueError(f'Matrix row {row["label"]!r} must have {len(columns)} values')
         values.extend(numbers(row["values"]))
     scale = max([abs(v) for v in values], default=0) or 1
-    def cell(value):
+    def cell(value, row_index, col_index):
         if value is None:
             return '<td class="missing">—</td>'
         endpoint = colors["matrix-negative"] if value < 0 else colors["primary"]
         fill = mix(colors["matrix-base"], endpoint, abs(value) / scale)
-        ink = text_on_fill(colors["ink"], fill)
-        return f'<td style="background:{fill};color:{ink}">{fmt(value)}</td>'
+        paper, body_ink = colors["paper"], colors["ink"]
+        ink = text_on_fill(body_ink, fill, (body_ink, paper))
+        fill = readable(fill, ink, endpoint=paper if ink == body_ink else body_ink)
+        content = cell_content(row_index, col_index, value) if cell_content else fmt(value)
+        return f'<td style="background:{fill};color:{ink}">{content}</td>'
 
     tables = []
     for start in range(0, len(columns), 8):
         stop = start + 8
         head = "".join(f'<th scope="col">{e(c)}</th>' for c in columns[start:stop])
         body = []
-        for row in rows:
-            cells = "".join(cell(v) for v in row["values"][start:stop])
+        for row_index, row in enumerate(rows):
+            cells = "".join(cell(v, row_index, j) for j, v in enumerate(row["values"][start:stop], start))
             body.append(f'<tr><th scope="row">{e(row["label"])}{refs(row)}</th>{cells}</tr>')
         tables.append('<div class="matrix-wrap"><table><thead><tr><th></th>' + head
                       + '</tr></thead><tbody>' + "".join(body) + '</tbody></table></div>')
@@ -312,20 +339,57 @@ def figures(block, refs):
 
 
 def intervals(block, refs):
-    lo, hi = block["domain"]
-    if len(numbers([lo, hi])) != 2 or hi <= lo:
-        raise ValueError("An interval domain needs two increasing finite numbers")
+    lo, hi = domain(block, [])
+    suffix = block.get("suffix", "")
     out = []
     for row in checked_list(block["rows"], "interval rows"):
         a, b = row["low"], row["high"]
         if len(numbers([a, b])) != 2 or not lo <= a <= b <= hi:
             raise ValueError("Interval endpoints must be ordered and inside the shared domain")
         start, end = ((v-lo)*100/(hi-lo) for v in (a, b))
-        out.append(f'<div class="interval-row"><b>{e(row["label"])}{refs(row)}</b>'
-                   f'<strong>{fmt(a)}–{fmt(b)}</strong><div class="interval-track" aria-hidden="true">'
-                   f'<i style="left:{start:.4f}%;width:{end-start:.4f}%"></i></div></div>')
-    return ('<div class="intervals">' + "".join(out) + f'<div class="interval-axis"><span>{fmt(lo)}</span>'
-            + f'<span>{fmt(hi)}</span></div></div>')
+        point = row.get("estimate")
+        reading = f'{fmt(a)}{e(suffix)}–{fmt(b)}{e(suffix)}'
+        marker = ""
+        if point is not None:
+            if not numbers([point]) or not lo <= point <= hi:
+                raise ValueError("The point estimate must be inside the plotted domain")
+            reading = f'{fmt(point)}{e(suffix)} <small>[{fmt(a)}, {fmt(b)}]</small>'
+            marker = f'<b class="estimate-dot" style="left:{100*(point-lo)/(hi-lo):.4f}%"></b>'
+        zero = f'<span class="scale-zero" style="left:{-100*lo/(hi-lo):.4f}%"></span>' if lo < 0 < hi else ""
+        css = "interval-row estimated" if marker else "interval-row"
+        out.append(f'<div class="{css}"><b>{e(row["label"])}{refs(row)}</b>'
+                   f'<strong>{reading}</strong><div class="interval-track" aria-hidden="true">{zero}'
+                   f'<i style="left:{start:.4f}%;width:{end-start:.4f}%"></i>{marker}</div></div>')
+    return '<div class="intervals">' + "".join(out) + scale_axis(lo, hi, suffix) + '</div>'
+
+
+def paired(block, refs):
+    groups = checked_list(block["groups"], "paired groups")
+    if len(groups) != 2:
+        raise ValueError("A paired chart needs two group labels")
+    rows = checked_list(block["rows"], "paired rows")
+    lo, hi = domain(block, numbers([r[k] for r in rows for k in ("a", "b")]))
+    suffix = e(block.get("suffix", ""))
+    legend = "".join(f'<span><i class="pair-dot {key}"></i>{e(label)}</span>' for key, label in zip(("a","b"),groups))
+    out = []
+    for row in rows:
+        a, b = row["a"], row["b"]
+        marks = []
+        if a is not None and b is not None:
+            left = 100 * (min(a,b) - lo) / (hi-lo)
+            width = 100 * abs(b-a) / (hi-lo)
+            marks.append(f'<i class="pair-line" style="left:{left:.4f}%;width:{width:.4f}%"></i>')
+        readings = []
+        for key, group, value in zip(("a","b"), groups, (a,b)):
+            reading = fmt(value) + (suffix if value is not None else "")
+            readings.append(f'<span aria-label="{e(group)} · {reading}"><i class="pair-dot {key}"></i>{reading}</span>')
+            if value is not None:
+                pos = 100 * (value-lo) / (hi-lo)
+                marks.append(f'<i class="pair-dot {key}" style="left:{pos:.4f}%"></i>')
+        out.append(f'<div class="pair-row"><div class="pair-name">{e(row["label"])}{refs(row)}</div>'
+                   + '<div class="pair-values">' + ''.join(readings) + '</div>'
+                   + '<div class="pair-track" aria-hidden="true">' + ''.join(marks) + '</div></div>')
+    return '<div class="pair-legend">' + legend + '</div><div class="paired">' + ''.join(out) + scale_axis(lo, hi, block.get("suffix","")) + '</div>'
 
 
 def web_link(label, url):
@@ -335,13 +399,88 @@ def web_link(label, url):
     return f'<a href="{e(url)}">{e(label)}</a>'
 
 
+def themes(block, refs, colors, sources, lang):
+    source = sources[block["source"]]
+    records = checked_list(source["records"], "reviewed records")
+    topics = checked_list(block["themes"], "themes")
+    labels = block["labels"]
+    positions = {topic["id"]: i for i, topic in enumerate(topics)}
+    if len(positions) != len(topics):
+        raise ValueError("Each theme needs a unique id")
+    members = [set() for topic in topics]
+    seen, entries = set(), []
+    for record in records:
+        key = record["id"]
+        if key in seen:
+            raise ValueError(f"Repeated reviewed record id {key!r}")
+        seen.add(key)
+        tagged, notes = set(), []
+        passages = record["passages"]
+        if not isinstance(passages, list):
+            raise ValueError("A reviewed record needs a passages list, possibly empty")
+        for passage in passages:
+            tags = set(checked_list(passage["themes"], "passage themes"))
+            if tags - positions.keys():
+                raise ValueError(f"Unknown theme in record {key!r}")
+            indices = sorted(positions[tag] for tag in tags)
+            tagged.update(indices)
+            loc = passage["locator"]
+            if not isinstance(loc, str) or not loc.strip():
+                raise ValueError(f"A passage in {key!r} needs a locator")
+            url = passage.get("url") or record.get("url")
+            pointer = web_link(loc, url) if url else e(loc)
+            tag_names = " · ".join(e(topics[i]["label"]) for i in indices)
+            notes.append(f'<li><b>{tag_names}</b> {pointer}' + optional("p", passage.get("text")) + '</li>')
+        for i in tagged:
+            members[i].add(key)
+        if notes:
+            indices_text = " ".join(str(i) for i in sorted(tagged))
+            entries.append(f'<article data-topics="{indices_text}"><h5>{e(record["label"])}</h5><ul>{"".join(notes)}</ul></article>')
+
+    total = len(records)
+    ranking = []
+    for i in sorted(range(len(topics)), key=lambda i: -len(members[i])):
+        count = len(members[i])
+        strip = " segmented" if total <= 60 else ""
+        ranking.append(f'<div class="theme-rank"><span>{e(topics[i]["label"])}</span><b>{count} / {total}</b>'
+                       f'<div class="theme-meter{strip}" style="--step:{100/total:.6f}%" aria-hidden="true">'
+                       f'<i style="width:{100*count/total:.5f}%"></i></div></div>')
+
+    short = [t.get("short", t["label"]) for t in topics]
+    cross = {"columns":short, "rows":[{"label":short[i], "values":[len(group & other) for other in members]}
+                                     for i, group in enumerate(members)]}
+
+    def button(i, j, value):
+        name = topics[i]["label"] if i == j else f'{topics[i]["label"]} × {topics[j]["label"]}'
+        return (f'<button type="button" class="theme-cell" data-pair="{i} {j}" data-label="{e(name)}" '
+                f'aria-label="{e(labels["evidence"])} · {e(name)} · {value}">{value}</button>')
+
+    evidence = (f'<details class="theme-evidence"><summary>{e(labels["evidence"])}</summary>'
+                f'<div class="theme-actions"><output aria-live="polite">{len(entries)} / {total}</output>'
+                f'<button type="button" data-all>{e(labels["all"])}</button></div>'
+                f'<div class="theme-entries">{"".join(entries)}</div></details>')
+    summary = (f'<p class="theme-coverage"><strong>{len(entries)} / {total}</strong> {e(labels["coverage"])}</p>'
+               if labels.get("coverage") else "")
+    hints = {"en":"Select a cell to see its records and source passages.",
+             "zh":"点击矩阵数字可查看对应的记录和原文位置。"}
+    language = lang.lower()
+    default_hint = hints["en"] if language.split("-")[0] == "en" else hints.get(language, "")
+    if language in ("zh-cn", "zh-hans", "zh-sg"):
+        default_hint = hints["zh"]
+    hint = optional("p", labels.get("hint", default_hint), "theme-hint")
+    return (f'<div class="theme-chart" data-total="{total}">' + summary + '<div class="theme-pair"><div>'
+            + optional("h4", labels["frequency"]) + "".join(ranking) + '</div><div>'
+            + optional("h4", labels["overlap"]) + matrix(cross,refs,colors,button) + hint + '</div></div>'
+            + evidence + '</div>')
+
+
 def evidence_list(source):
     records = source.get("records")
     if not records:
         return ""
     rows = []
     for record in checked_list(records, "source records"):
-        link = web_link(record["label"], record["url"])
+        link = web_link(record["label"], record["url"]) if record.get("url") else e(record["label"])
         rows.append(f'<li>{link}' + optional("span", record.get("locator"), "source-detail") + "</li>")
     return ('<details class="evidence"><summary>' + e(source["records_label"]) + '</summary>'
             + optional("p", source.get("key")) + '<ul>' + "".join(rows) + '</ul></details>')
@@ -384,34 +523,53 @@ def render(data):
         raise ValueError("palette must be an object")
     colors = resolve(settings.get("colors"))
     palette_note = palette_references(settings, lang)
+    by_id = {source["id"]: source for source in sources}
     charts = {"bars": bars, "columns": column_chart, "trend": trend, "matrix": partial(matrix, colors=colors), "cases": cases,
-              "flow": partial(flow, colors=colors), "units": units, "figures": figures, "intervals": intervals}
+              "flow": partial(flow, colors=colors), "units": units, "figures": figures, "intervals": intervals,
+              "paired": paired, "themes": partial(themes, colors=colors, sources=by_id, lang=lang)}
 
     def draw(block, lead=False):
         kind = block["type"]
         if kind not in charts:
             raise ValueError(f"Unknown chart type {kind!r}")
-        wide = block.get("wide") or (kind == "matrix" and len(block["columns"]) > 6)
+        wide = block.get("wide") or kind == "themes" or (kind == "matrix" and len(block["columns"]) > 6)
         classes = "block wide" if wide else "block"
         heading = "h2" if lead else "h3"
-        label = heading_text(block["title"], lang, refs(block))
+        keys = list(block.get("refs", []))
+        if kind == "themes" and block["source"] not in keys:
+            keys.append(block["source"])
+        label = heading_text(block["title"], lang, refs({"refs":keys}))
+        pointers = []
+        for key in keys:
+            source = by_id[key]
+            name = source.get("short_label", source["label"])
+            if source.get("locator"):
+                name += " · " + source["locator"]
+            pointers.append(web_link(name, source["url"]) if source.get("url") else
+                            f'<a href="#source-{source_index[key]}">{e(name)}</a>')
+        source_line = '<div class="chart-sources">' + " · ".join(pointers) + '</div>' if pointers else ""
         return (f'<figure class="{classes}"><figcaption><{heading}>{label}</{heading}>'
                 + optional("p", block.get("caption"), "chart-caption") + optional("p", block.get("unit"), "unit")
                 + '</figcaption><div class="chart">'
-                + charts[kind](block, refs) + '</div>' + optional("p", block.get("note"), "chart-note") + '</figure>')
+                + charts[kind](block, refs) + '</div>' + optional("p", block.get("note"), "chart-note")
+                + source_line + '</figure>')
 
     title = data["title"]
     metrics = []
     for m in data.get("metrics", []):
         metrics.append(f'<div class="metric"><dt>{e(m["label"])}{refs(m)}</dt><dd>{e(m["value"])}</dd></div>')
+    lead = data.get("lead")
+    beside = lead and lead.get("placement") == "beside"
+    header = '<header class="hero compact-hero"><div class="hero-main">' if beside else '<header class="hero">'
     body = [
-        '<header class="hero"><div class="headline">', optional("p", data.get("kicker"), "eyebrow"),
+        header, '<div class="headline">', optional("p", data.get("kicker"), "eyebrow"),
         f'<h1>{heading_text(title, lang)}</h1>', optional("p", data.get("intro"), "intro"),
         optional("p", data.get("data_note"), "note"), "</div>",
+        '<div class="lead hero-chart">' + draw(lead, lead=True) + '</div></div>' if beside else "",
         '<dl class="metrics">' + "".join(metrics) + "</dl>" if metrics else "", "</header>",
     ]
-    if data.get("lead"):
-        body.append('<section class="lead">' + draw(data["lead"], lead=True) + '</section>')
+    if lead and not beside:
+        body.append('<section class="lead">' + draw(lead, lead=True) + '</section>')
     for section in checked_list(data["sections"], "sections"):
         columns = section.get("columns", 2)
         if type(columns) is not int or columns not in (1, 2, 3):

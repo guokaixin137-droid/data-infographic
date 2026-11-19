@@ -1,0 +1,59 @@
+{
+  "lang": "zh-CN",
+  "kicker": "社区图书馆 · 两家分馆",
+  "title": "读者怎样才能更快找到书？",
+  "intro": "调整书架标识后，两家分馆的找书时间都有缩短。回到读者来信，可以看出馆内哪些线索仍然让人困惑。",
+  "data_note": "演示数据 · 本例中的来信、观察和问卷均为虚构",
+  "palette": {"colors":{"paper":"#FBF9F4","ink":"#281E46","primary":"#62519A","accent":"#FF925B","negative":"#AC3F21"}},
+  "lead": {
+    "type": "paired", "placement": "beside", "title": "两馆找书用时的中位数",
+    "unit": "分钟 · 每馆每轮各观察 20 次", "groups": ["调整前", "调整后"], "domain": [0, 10],
+    "rows": [{"label":"北馆","a":9,"b":5},{"label":"南馆","a":7,"b":6}],
+    "note": "两轮分别观察到访读者，人群可能不同。", "refs": ["before-after"]
+  },
+  "sections": [
+    {
+      "title": "来信里，哪些困难常常相伴？",
+      "blocks": [{
+        "type":"themes", "source":"letters", "title":"架号是来信中提及最多的问题",
+        "caption":"每行按整封来信计数。右侧格子表示同时提到行、列两个主题的信数，对角线是各主题总数。",
+        "themes":[{"id":"shelf","label":"看不懂架号","short":"架号"},{"id":"map","label":"缺少楼层指引","short":"指引"},{"id":"staff","label":"需要馆员帮忙","short":"馆员"}],
+        "labels":{"frequency":"每个问题有几封信提到？","overlap":"哪些问题出现在同一封信里？","coverage":"封来信明确提到至少一项找书困难","evidence":"查看带段落定位的来信","all":"显示全部命中来信"},
+        "note":"逐段审阅了全部来信。末封只建议增设座椅，保留在分母中。"
+      }]
+    },
+    {
+      "title":"读者希望图书馆先改什么？",
+      "blocks":[
+        {"type":"bars","title":"最想增加的馆内提示","caption":"50 名到馆读者可选多项。","unit":"占回答者的比例","domain":[0,100],"suffix":"%","refs":["survey"],
+         "rows":[{"label":"更醒目的架号","value":60},{"label":"楼层地图","value":44},{"label":"咨询台位置提示","value":20}]},
+        {"type":"columns","title":"一次找书花了多久？","caption":"每次观察只归入一个时长区间。","unit":"独立观察 50 次 · 次数","refs":["timing"],
+         "rows":[{"label":"不足 3 分钟","value":12},{"label":"3 至不足 6 分钟","value":22},{"label":"6 至不足 10 分钟","value":10},{"label":"10 分钟及以上","value":6}]}
+      ]
+    },
+    {
+      "title":"两种找书方式的时间分布",
+      "blocks":[
+        {"type":"intervals","title":"查看书架图的读者用时更集中","unit":"分钟 · 每组 25 次","caption":"点是中位数，横线覆盖中间一半的观察。","domain":[0,12],"refs":["routes"],
+         "rows":[{"label":"自行按目录找书","low":3,"estimate":6,"high":10},{"label":"先看书架图","low":2,"estimate":4,"high":6}],"note":"读者自行选择路径，两组可能熟悉程度不同。"},
+        {"type":"cases","title":"为什么标了架号还要问人？","items":[{"title":"来信 03 · 第 1–2 段","text":"目录里有架号，地图上却找不到对应位置。这位读者最后请馆员带路。","refs":["letters"]}]}
+      ]
+    }
+  ],
+  "method":"来信按整封去重，可有多个主题。读者问卷、找书计时和两馆前后观察是不同样本。",
+  "sources":[
+    {"id":"letters","label":"读者来信","locator":"6 封，全量审阅","records_label":"浏览 6 封来信的定位",
+     "records":[
+       {"id":"L01","label":"来信 01","locator":"第 1–2 段","passages":[{"themes":["shelf"],"locator":"第 1 段","text":"书架编号太小。"},{"themes":["shelf","map"],"locator":"第 2 段","text":"楼层图上也看不到这个编号。"}]},
+       {"id":"L02","label":"来信 02","locator":"第 1 段","passages":[{"themes":["shelf"],"locator":"第 1 段","text":"同一排两套架号容易混淆。"}]},
+       {"id":"L03","label":"来信 03","locator":"第 1–2 段","passages":[{"themes":["shelf","map"],"locator":"第 1 段","text":"书架编号与楼层图对不上。"},{"themes":["staff"],"locator":"第 2 段","text":"请馆员带到了目标书架。"}]},
+       {"id":"L04","label":"来信 04","locator":"第 1 段","passages":[{"themes":["map"],"locator":"第 1 段","text":"想知道上到二楼后往哪边走。"}]},
+       {"id":"L05","label":"来信 05","locator":"第 2 段","passages":[{"themes":["shelf","staff"],"locator":"第 2 段","text":"看不懂架号，最后询问馆员。"}]},
+       {"id":"L06","label":"来信 06","locator":"第 1 段 · 希望增设座椅","passages":[]}
+     ]},
+    {"id":"before-after","label":"两馆前后观察表","locator":"表 1 · 两馆各两轮"},
+    {"id":"survey","label":"到馆问卷","locator":"第 3 题 · 有效回答 50 份"},
+    {"id":"timing","label":"找书计时记录","locator":"表 2 · 50 次独立观察"},
+    {"id":"routes","label":"找书路径观察","locator":"表 3 · 各组第 25、50、75 百分位"}
+  ]
+}

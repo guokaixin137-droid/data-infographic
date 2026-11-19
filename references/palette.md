@@ -13,7 +13,7 @@
 
 从观察中给纸色、正文深色、图表主色、重点强调色和负值色分配角色。让同一含义跨章节、语言和输出格式保持一致。深底上的亮黄可以用在关键数字，浅底图形可采用有足够对比度的深色。用标签、正负号或位置辅助辨识。查色与排版通常由 Agent 一次完成。
 
-随附渲染器接受可选的 palette。colors 包含 paper、ink、primary、accent、negative 五个 #RRGGBB 色值。渲染器会在文字或数据标记与底色过于接近时调整明暗，并为矩阵数字选择可读的字色。references 接受有 label、url 和可选 note 的数组，显示在成品末尾的“配色参考”中。可用 heading 本地化该标题。由资料导出的事实仍放在顶层 sources。色值随 HTML 写入，离线导出可以复现。
+随附渲染器接受可选的 palette。colors 包含 paper、ink、primary、accent、negative 五个 #RRGGBB 色值。渲染器会在文字或数据标记与底色过于接近时调整明暗。矩阵数字沿用纸色或墨色，中间色阶有需要时略调底色，使数字对比度达到 4.5:1。references 接受有 label、url 和可选 note 的数组，显示在成品末尾的“配色参考”中。可用 heading 本地化该标题。由资料导出的事实仍放在顶层 sources。色值随 HTML 写入，离线导出可以复现。
 
 例如，为与 Wes Bos 的 Cobalt2 作品相关的图解配色时，作者公布的深蓝和黄色可直接用作主题依据。下面的浅底由制图者选定，负值色在作品粉色基础上加深以便在纸色上辨识。[作者对 Cobalt2 的介绍](https://wesbos.com/uses) · [作者公布的色表](https://github.com/wesbos/cobalt2-vscode#colours)
 
