@@ -1,0 +1,54 @@
+{
+  "lang": "zh-CN",
+  "kicker": "社区维修日 · 三周观察",
+  "title": "第三周，多修好的四件从哪来？",
+  "intro": "三次活动共修好 21 件物品。从第一周到第三周，灯具和衣物各多修好 2 件，木器数量持平。",
+  "data_note": "演示数据 · 活动与记录均为虚构",
+  "metrics": [
+    {"label": "三周修好物品", "value": "21 件", "refs": ["ledger"]},
+    {"label": "首周到第三周", "value": "5 → 9 件", "refs": ["ledger"]},
+    {"label": "贡献增量的类别", "value": "2 类", "refs": ["ledger"]}
+  ],
+  "sections": [
+    {
+      "title": "每周都多修好了两件",
+      "summary": "灯具的三周累计最高。按周展开后，增长来自哪些类别才看得清楚。",
+      "blocks": [
+        {
+          "type": "trend", "title": "每周修好件数", "unit": "件 / 周", "refs": ["ledger"],
+          "rows": [{"label": "第一周", "value": 5}, {"label": "第二周", "value": 7}, {"label": "第三周", "value": 9}]
+        },
+        {
+          "type": "bars", "title": "按物品类别累计", "unit": "件 · 三周合计", "refs": ["ledger"],
+          "rows": [{"label": "灯具", "value": 8}, {"label": "木器", "value": 7}, {"label": "衣物", "value": 6}]
+        }
+      ]
+    },
+    {
+      "title": "灯具在最后一周增加，衣物连续两周增加",
+      "blocks": [
+        {
+          "type": "matrix", "title": "三类物品分别在哪周修好？", "unit": "件 · 颜色越深，件数越多", "refs": ["ledger"],
+          "columns": ["灯具", "木器", "衣物"],
+          "rows": [
+            {"label": "第一周", "values": [2, 2, 1]},
+            {"label": "第二周", "values": [2, 3, 2]},
+            {"label": "第三周", "values": [4, 2, 3]}
+          ]
+        },
+        {
+          "type": "cases", "title": "再看维修台上的记录",
+          "items": [
+            {"title": "一盏台灯怎样算一件？", "text": "一盏台灯更换两个零件，按一件完工物品登记。", "refs": ["notes"]},
+            {"title": "一张椅子何时入账？", "text": "椅子在第二周送来，第三周修好，计入第三周的木器。", "refs": ["notes"]}
+          ]
+        }
+      ]
+    }
+  ],
+  "method": "按完工周统计，每件物品只计一次。此例使用虚构登记表和虚构案例，供练习选题、制图和出处跳转。",
+  "sources": [
+    {"id": "ledger", "label": "示例完工登记表", "locator": "虚构资料 · 三周汇总表，3 个类别 × 3 周"},
+    {"id": "notes", "label": "示例维修台记录", "locator": "虚构资料 · 台灯与木椅两条登记说明"}
+  ]
+}

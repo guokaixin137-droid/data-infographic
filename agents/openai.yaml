@@ -1,0 +1,4 @@
+interface:
+  display_name: "数据长图"
+  short_description: "从转录或表格制作可追溯的信息图，支持自动选题或由用户挑选方向"
+  default_prompt: "用 $data-infographic 把我的资料做成竖版信息图，先让我选择自动生成或先看选题方向。"
