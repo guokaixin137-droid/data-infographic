@@ -2,19 +2,29 @@
 
 这是一个在 Codex 对话里使用的小工具。把文章、访谈、读者来信或表格发给它，它会找出重点，做成一张竖版长图。读者先看关键发现，再往下看图表和原文例子。
 
+## 拿到链接，怎么用？
+
+**打开 Codex，把下面的话复制到对话里，附上你的资料，一起发送。**
+
+```text
+请安装并使用这个技能，把我附上的资料做成一张竖版信息图。
+https://github.com/guokaixin137-droid/data-infographic
+技能名是 data-infographic，放在仓库最外层。
+```
+
+Codex 会问你想让它直接做图，还是先给几个选题让你挑。想让它全程安排，就回复「你来定」。以后用时，只要附上新资料并说「用数据长图做图」。
+
+分享给同事时，发这个 [GitHub 链接](https://github.com/guokaixin137-droid/data-infographic) 就行。仓库公开可读，做图用的材料发在各自的 Codex 对话里。
+
+## 做出来是什么样？
+
 [![虚构的社区维修记录。三周分别修好 5、7、9 件，第三周比第一周多 4 件。点开可看完整长图。](docs/from-records-to-chart.png)](docs/repair-day.png)
 
 在这个虚构的「社区维修日」例子里，多修好的 4 件来自灯具和衣物，各多 2 件。木器数量持平。[看完整长图](docs/repair-day.png)
 
-## 怎样做出第一张图？
+## 可以交给它哪些资料？
 
-**第一次用，先安装。** 在 Codex 对话里发送下面这句话。这个仓库是私有的，安装时需要连接有访问权限的 GitHub 账号。
-
-> 请从 GitHub 仓库 `guokaixin137-droid/data-infographic` 安装个人技能 `data-infographic`。技能就在仓库最外层。
-
-如果你已经下载了仓库，也可以在 Codex 里打开解压后的文件夹，说「请安装这个技能」。
-
-**装好后，发材料。** 可以附文件、告诉 Codex 要读哪个文件夹，或贴一个它能打开的分享链接。比如，附上读者来信后，可以在对话里这样说。
+可以附文件、告诉 Codex 要读哪个文件夹，或贴一个它能打开的分享链接。比如，附上读者来信后，可以在对话里这样说。
 
 > 用 `$data-infographic` 把这些读者来信做成一张长图，给编辑部开会用。最后给我一张能发到群里的图片。
 
@@ -52,12 +62,14 @@
 <details>
 <summary>习惯用终端？展开手动安装和导出示例</summary>
 
-在 macOS 或 Linux 上，用有仓库访问权限的账号登录 GitHub CLI（`gh auth login`），然后运行以下命令。
+如果使用 Codex 自带的 `skill-installer`，给它仓库链接，并指定 `--path . --name data-infographic`。其中 `.` 表示技能在仓库最外层。
+
+在装有 Git 的 macOS 或 Linux 上，首次安装可以运行以下命令。
 
 ```sh
 skill_root="${CODEX_HOME:-$HOME/.codex}/skills"
 mkdir -p "$skill_root"
-gh repo clone guokaixin137-droid/data-infographic "$skill_root/data-infographic"
+git clone https://github.com/guokaixin137-droid/data-infographic.git "$skill_root/data-infographic"
 cd "$skill_root/data-infographic"
 ```
 
